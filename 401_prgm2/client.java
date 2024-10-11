@@ -1,3 +1,6 @@
+// Program 2  due October 13, 2024
+// Lukas White and Thomas Davis
+// --- Client that requests calculations
 
 import java.io.*;
 import java.net.*;
@@ -8,28 +11,30 @@ public class client{
 	{
 		Scanner input = new Scanner(System.in);
 		String serverResponse;
-		double circleArea, circleRadius;
+		String res = "";
 		
-		System.out.println("Enter the radius of the circle");
-		circleRadius = input.nextDouble();
+		String word[] = {"Enter Number To Square: ", "Enter Number To SquareRoot: ", "Enter Number To Factorial: "};
 		
+		// for loop that requests the user to input numbers 
+		for (int i = 0; i < 3; i++) {
+		    System.out.println(word[i]);
+		    int toReturn = input.nextInt();
+		    res += String.valueOf(toReturn);
+		    if (i < 2) {
+		        res += ",";
+		    }
+		}
 		
-		
-		//System.out.println(add);
+		// Makes the connection
 		Socket socket = new Socket("localhost",8080);
 		
 		PrintWriter out = new PrintWriter(socket.getOutputStream(), true); 
 		
 		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		
-		out.println(circleRadius);
+		out.println(res); // sends the string to the server once connection is made
 		
-		serverResponse = in.readLine();
+		serverResponse = in.readLine(); // waits and receives response
 		System.out.println(serverResponse);
-		//circleArea = Double.valueOf(serverResponse);
-		//System.out.println("The area of the circle with radius "+circleRadius+" is: "+ circleArea);
-		
-			
-		
 	}
 }
