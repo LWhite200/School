@@ -1,0 +1,2 @@
+made in December 2023 by Lukas White for 'introductory' visual basic class that my school no longer has as of a year later.
+This Program takes in a text file and compares grades and detects errors.

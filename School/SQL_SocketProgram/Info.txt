@@ -1,0 +1,4 @@
+This was an ambitious project that incorperates sql, socket programming, and multithreading.
+I had 1 week to learn all this stuff and make this work as my teacher failed to teach us well,
+but in the end it works and I am very proud of this. 
+This was made August 2024 by Lukas White

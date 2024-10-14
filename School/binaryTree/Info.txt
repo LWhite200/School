@@ -1,0 +1,2 @@
+This was a simple program from my data structure class that had us impliment a binary tree
+and then write to the console all the types of depth first search (dfs)

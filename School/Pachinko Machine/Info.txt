@@ -1,0 +1,3 @@
+This is a Pachinko Machine animation made using javaFX for my java3 class.
+Although I did not get 10/10, I am very proud I made this on my own without 
+cheating like I know my classmates did. 

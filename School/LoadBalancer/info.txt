@@ -1,0 +1,3 @@
+These are the client, server, and load balancer classes to operate a simple server
+that computes simple calculations. This was a group project but my partner didn't do much,
+so I basically did this on my own.
