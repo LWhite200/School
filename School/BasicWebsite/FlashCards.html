@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard App</title>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            flex-direction: column;
+            margin: 0;
+        }
+        #flashcard-container {
+            width: 500px;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            padding: 20px;
+        }
+        #flashcard {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            line-height: 1.4;
+        }
+        #type-label {
+            font-size: 16px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+        #count-label {
+            position: absolute;
+            bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+        }
+        #upload-area {
+            border: 3px dashed #aaa;
+            width: 500px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 15px;
+            transition: border-color 0.3s ease;
+        }
+        #upload-area.dragging {
+            border-color: #666;
+        }
+        #upload-area.hidden {
+            display: none;
+        }
+        #upload-area:hover {
+            border-color: #888;
+        }
+        /* Button to read aloud */
+        #read-aloud-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #read-aloud-btn:hover {
+            background-color: #0056b3;
+        }
+        /* Adjust for extra long definitions */
+        #flashcard-container.large-text #flashcard {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="flashcard-container">
+        <div id="flashcard">Drag a text file to start</div>
+        <div id="type-label">Word:::Definition</div>
+        <div id="count-label"></div>
+    </div>
+
+    <div id="upload-area">
+        Drag & drop your file here, or click to select.
+    </div>
+
+    <button id="read-aloud-btn">Read Aloud</button>
+
+    <input type="file" id="file-input" style="display: none;">
+
+    <script>
+        let flashcards = [];
+        let currentIndex = 0;
+        let showingWord = true; // Tracks if we're showing the word or definition
+
+        const flashcardElement = document.getElementById('flashcard');
+        const typeLabel = document.getElementById('type-label');
+        const countLabel = document.getElementById('count-label');
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const flashcardContainer = document.getElementById('flashcard-container');
+        const readAloudButton = document.getElementById('read-aloud-btn');
+
+        // Function to load the file content
+        function loadFlashcards(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const lines = event.target.result.split('\n');
+                flashcards = lines.map(line => {
+                    const [word, definition] = line.split(':::');
+                    return { word: word?.trim(), definition: definition?.trim() };
+                }).filter(card => card.word && card.definition);
+                currentIndex = 0;
+                updateFlashcard();
+                hideUploadArea();
+            };
+            reader.readAsText(file);
+        }
+
+        // Function to dynamically adjust text size
+        function adjustTextSize(text) {
+            if (text.length > 100) {
+                flashcardContainer.classList.add('large-text');
+            } else {
+                flashcardContainer.classList.remove('large-text');
+            }
+        }
+
+        // Function to update the flashcard content
+        function updateFlashcard() {
+            if (flashcards.length === 0) return;
+            const card = flashcards[currentIndex];
+            const text = showingWord ? card.word : card.definition;
+            flashcardElement.textContent = text;
+            adjustTextSize(text);
+            typeLabel.textContent = showingWord ? "Word" : "Definition";
+            countLabel.textContent = `${currentIndex + 1}/${flashcards.length}`;
+        }
+
+        // Function to hide upload area
+        function hideUploadArea() {
+            uploadArea.classList.add('hidden');
+        }
+
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', function(event) {
+            event.preventDefault();
+            uploadArea.classList.add('dragging');
+        });
+
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.classList.remove('dragging');
+        });
+
+        uploadArea.addEventListener('drop', function(event) {
+            event.preventDefault();
+            uploadArea.classList.remove('dragging');
+            const file = event.dataTransfer.files[0];
+            loadFlashcards(file);
+        });
+
+        // Handle file input click
+        uploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            loadFlashcards(file);
+        });
+
+        // Handle space key to flip the card
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                event.preventDefault(); // Prevent default spacebar scroll behavior
+                showingWord = !showingWord; // Toggle between word and definition
+                updateFlashcard();
+            } else if (event.code === 'ArrowRight' || event.code === 'KeyD') {
+                // Move to the next flashcard (right arrow or 'd')
+                currentIndex = (currentIndex + 1) % flashcards.length;
+                showingWord = true; // Always start by showing the word
+                updateFlashcard();
+            } else if (event.code === 'ArrowLeft' || event.code === 'KeyA') {
+                // Move to the previous flashcard (left arrow or 'a')
+                currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
+                showingWord = true; // Always start by showing the word
+                updateFlashcard();
+            }
+        });
+
+        // Read aloud function
+        // Read aloud function with adjustable rate
+        function readAloud(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 2; // Adjust this value for speed: 1.5 is faster, 0.8 is slower
+            speechSynthesis.speak(utterance);
+        }
+
+
+        // Handle click event for the read aloud button
+        readAloudButton.addEventListener('click', function() {
+            const card = flashcards[currentIndex];
+            const text = showingWord ? card.word : card.definition;
+            readAloud(text);
+        });
+    </script>
+
+</body>
+</html>

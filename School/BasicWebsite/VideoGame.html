@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pikmin Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1e00ff;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1e00ff;
+        }
+        #gameCanvas {
+            background: #00c700;
+            border: 1px solid #000;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-family: Arial, sans-serif;
+            color: #fff;
+            font-size: 18px;
+        }
+        #playAgain {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #4e71b3;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Available Pikmin: 15 | Pikmin on Field: 0</div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <button id="playAgain">Play Again</button>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const info = document.getElementById('info');
+        const playAgainButton = document.getElementById('playAgain');
+
+        // Game variables
+        const base = {
+            x: Math.random() * (canvas.width - 100) + 50,
+            y: Math.random() * (canvas.height - 100) + 50,
+            radius: 50
+        };
+        const maxPikmin = 15;
+        let pikminCount = maxPikmin;
+        let pikminArray = [];
+        let objects = [];
+        let gameWon = false;
+        let callbackCircle = { x: null, y: null, radius: 50, visible: false };
+
+        function getRandomPikminNeeded() {
+            return Math.floor(Math.random() * 15) + 1;
+        }
+
+        function spawnObjects() {
+            objects = Array.from({ length: 3 }, () => ({
+                x: Math.random() * (canvas.width - 50) + 25,
+                y: Math.random() * (canvas.height - 50) + 25,
+                radius: 25,
+                pikminNeeded: getRandomPikminNeeded(),
+                holdingPikmin: 0,
+                pikminCarrying: []
+            }));
+        }
+
+        function drawBase() {
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.arc(base.x, base.y, base.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawObjects() {
+            objects.forEach(obj => {
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#000';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${obj.pikminNeeded - obj.holdingPikmin}`, obj.x, obj.y + 5);
+            });
+        }
+
+        function drawPikmin() {
+            pikminArray.forEach(pikmin => {
+                ctx.fillStyle = '#FF6347';
+                ctx.beginPath();
+                ctx.arc(pikmin.x, pikmin.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function drawCallbackCircle() {
+            if (callbackCircle.visible) {
+                ctx.strokeStyle = '#00f';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(callbackCircle.x, callbackCircle.y, callbackCircle.radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function updateInfo() {
+            info.textContent = `Available Pikmin: ${pikminCount} | Pikmin on Field: ${maxPikmin - pikminCount}`;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBase();
+            drawObjects();
+            drawPikmin();
+            drawCallbackCircle();
+            updateInfo();
+
+            if (gameWon) {
+                playAgainButton.style.display = 'block';
+            }
+        }
+
+        function getDistance(x1, y1, x2, y2) {
+            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+        }
+
+        function handleLeftClick(x, y) {
+            if (pikminCount > 0) {
+                const newPikmin = { x, y, carryingObject: false };
+                pikminArray.push(newPikmin);
+                pikminCount--;
+
+                objects.forEach(obj => {
+                    const distance = getDistance(x, y, obj.x, obj.y);
+                    if (distance < obj.radius) {
+                        obj.holdingPikmin++;
+                        obj.pikminCarrying.push(newPikmin);
+                        if (obj.holdingPikmin >= obj.pikminNeeded) {
+                            moveObjectAndPikminToBase(obj);
+                        }
+                    }
+                });
+            }
+            draw();
+        }
+
+        function handleRightClick(x, y) {
+            callbackCircle.x = x;
+            callbackCircle.y = y;
+            callbackCircle.visible = true;
+
+            pikminArray = pikminArray.filter(pikmin => {
+                const distance = getDistance(x, y, pikmin.x, pikmin.y);
+                if (distance < callbackCircle.radius) {
+                    pikminCount++;
+                    pikmin.carryingObject = false; // Ensure pikmin are not carrying objects
+                    // Remove the pikmin from any object it's carrying
+                    objects.forEach(obj => {
+                        const pikminIndex = obj.pikminCarrying.indexOf(pikmin);
+                        if (pikminIndex !== -1) {
+                            obj.holdingPikmin--;
+                            obj.pikminCarrying.splice(pikminIndex, 1);
+                            // Stop object movement if not enough pikmin are carrying it
+                            if (obj.holdingPikmin < obj.pikminNeeded) {
+                                obj.moving = false;
+                            }
+                        }
+                    });
+                    return false;
+                }
+                return true;
+            });
+
+            setTimeout(() => {
+                callbackCircle.visible = false;
+                draw();
+            }, 100); // Hide circle after 100ms
+        }
+
+        function moveObjectAndPikminToBase(obj) {
+            obj.moving = true; // Mark object as moving
+            const interval = setInterval(() => {
+                if (!obj.moving) {
+                    clearInterval(interval);
+                    return;
+                }
+                const dx = base.x - obj.x;
+                const dy = base.y - obj.y;
+                const distance = getDistance(obj.x, obj.y, base.x, base.y);
+
+                if (distance < 5) {
+                    clearInterval(interval);
+                    objects = objects.filter(o => o !== obj); // Remove object from array
+                    obj.pikminCarrying.forEach(pikmin => {
+                        pikmin.carryingObject = false;
+                    });
+
+                    if (objects.length === 0) {
+                        gameWon = true;
+                    }
+                } else {
+                    obj.x += dx / distance * 2;
+                    obj.y += dy / distance * 2;
+
+                    obj.pikminCarrying.forEach(pikmin => {
+                        const pikminDx = base.x - pikmin.x;
+                        const pikminDy = base.y - pikmin.y;
+                        const pikminDistance = getDistance(pikmin.x, pikmin.y, base.x, base.y);
+                        if (pikminDistance < 5) {
+                            pikmin.x = base.x;
+                            pikmin.y = base.y;
+                        } else {
+                            pikmin.x += pikminDx / pikminDistance * 2;
+                            pikmin.y += pikminDy / pikminDistance * 2;
+                        }
+                    });
+                }
+
+                draw();
+            }, 20);
+        }
+
+        canvas.addEventListener('mousedown', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            if (event.button === 0) { // Left click
+                handleLeftClick(x, y);
+            } else if (event.button === 2) { // Right click
+                handleRightClick(x, y);
+            }
+        });
+
+        canvas.addEventListener('contextmenu', (event) => {
+            event.preventDefault(); // Prevent context menu on right click
+        });
+
+        function gameLoop() {
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            base.x = Math.random() * (canvas.width - 100) + 50;
+            base.y = Math.random() * (canvas.height - 100) + 50;
+            spawnObjects();
+            pikminArray = [];
+            pikminCount = maxPikmin;
+            gameWon = false;
+            playAgainButton.style.display = 'none';
+            draw();
+        }
+
+        playAgainButton.addEventListener('click', resetGame);
+
+        spawnObjects(); // Initial spawn of objects
+        gameLoop();
+    </script>
+</body>
+</html>

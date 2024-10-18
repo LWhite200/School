@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Collection</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            margin-top: 20px;
+            color: #333;
+        }
+        .recipe-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        .recipe-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .recipe-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .recipe-card h2 {
+            font-size: 22px;
+            margin: 15px 0;
+            color: #555;
+            text-align: center;
+        }
+        .recipe-info {
+            padding: 15px;
+            color: #666;
+        }
+        .recipe-info p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .recipe-info ul {
+            padding-left: 20px;
+        }
+        .recipe-info ul li {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Recipe Collection</h1>
+
+    <div class="recipe-container">
+        <!-- Recipe 1 -->
+        <div class="recipe-card">
+            <img src="images/lasagna.jpg" alt="Lasagna">
+            <h2>Lasagna</h2>
+            <div class="recipe-info">
+                <p><strong>Ingredients:</strong></p>
+                <ul>
+                    <li>Tomato Sauce</li>
+                    <li>Tomato Paste</li>
+                    <li>Lasagna Noodles</li>
+                    <li>Mozzarella Cheese</li>
+                    <li>Meat</li>
+                </ul>
+                <p><strong>Instructions:</strong></p>
+                <p>Cook noodles and meat sauce. When done, form the lasagna and bake in the oven at 350°F for 10 minutes.</p>
+            </div>
+        </div>
+
+        <!-- Recipe 2 -->
+        <div class="recipe-card">
+            <img src="images/alfredo.jpg" alt="Chicken Alfredo">
+            <h2>Chicken Alfredo</h2>
+            <div class="recipe-info">
+                <p><strong>Ingredients:</strong></p>
+                <ul>
+                    <li>Fettuccine Noodles</li>
+                    <li>Feta Cheese</li>
+                    <li>Parmesan Cheese</li>
+                    <li>Heavy Cream</li>
+                    <li>Chicken</li>
+                </ul>
+                <p><strong>Instructions:</strong></p>
+                <p>Bake chicken in the oven at 350°F for 30 minutes. Cook noodles. When both are done, make the sauce and stir carefully to prevent burning.</p>
+            </div>
+        </div>
+
+        <!-- Recipe 3 -->
+        <div class="recipe-card">
+            <img src="images/bcmc.jpg" alt="Buffalo Chicken Mac and Cheese">
+            <h2>Buffalo Chicken Mac and Cheese</h2>
+            <div class="recipe-info">
+                <p><strong>Ingredients:</strong></p>
+                <ul>
+                    <li>Macaroni Noodles</li>
+                    <li>Popcorn Chicken</li>
+                    <li>Buffalo Sauce</li>
+                    <li>Sharp Cheddar</li>
+                    <li>Monterey Jack Cheese</li>
+                    <li>Evaporated Milk</li>
+                    <li>Milk</li>
+                </ul>
+                <p><strong>Instructions:</strong></p>
+                <p>Prepare the chicken as instructed. Combine the other ingredients in a crockpot. Stir after 1 hour, then let it cook for another hour.</p>
+            </div>
+        </div>
+
+        <!-- Recipe 4 -->
+        <div class="recipe-card">
+            <img src="images/meatTort.jpg" alt="Meat Tortellini">
+            <h2>Meat Tortellini</h2>
+            <div class="recipe-info">
+                <p><strong>Ingredients:</strong></p>
+                <ul>
+                    <li>Tortellini</li>
+                    <li>Tomato Sauce</li>
+                    <li>Tomato Paste</li>
+                    <li>Cream Cheese</li>
+                    <li>Mozzarella Cheese</li>
+                    <li>Meat</li>
+                </ul>
+                <p><strong>Instructions:</strong></p>
+                <p>Cook noodles, meat, and sauce separately, then combine.</p>
+            </div>
+        </div>
+
+        <!-- Recipe 5 -->
+        <div class="recipe-card">
+            <img src="images/ramen.jpg" alt="Ramen Noodles">
+            <h2>Ramen Noodles</h2>
+            <div class="recipe-info">
+                <p><strong>Ingredients:</strong></p>
+                <ul>
+                    <li>Angel Hair Noodle</li>
+                    <li>Chicken Broth</li>
+                    <li>Butter</li>
+                </ul>
+                <p><strong>Instructions:</strong></p>
+                <p>Cook noodles, meat, and sauce separately, then combine.</p>
+            </div>
+        </div>
+
+        <!-- Recipe 6 -->
+        <div class="recipe-card">
+            <img src="images/ramen.jpg" alt="different Ramen Noodles">
+            <h2>Different Ramen Noodles</h2>
+            <div class="recipe-info">
+                <p><strong>Ingredients:</strong></p>
+                <ul>
+                    <li>Angel Hair Noodle</li>
+                    <li>Butter</li>
+                    <li>Soy Sauce</li>
+                    <li>Parmesan Cheese</li>
+                </ul>
+                <p><strong>Instructions:</strong></p>
+                <p>Cook noodles, meat, and sauce separately, then combine.</p>
+            </div>
+        </div>
+
+         <!-- Recipe 7 -->
+         <div class="recipe-card">
+            <img src="images/orangechicken.jpg" alt="Orange Chicken">
+            <h2>Orange Chicken</h2>
+            <div class="recipe-info">
+                <p><strong>Ingredients:</strong></p>
+                <ul>
+                    <li>Chicken</li>
+                    <li>Orange Juice</li>
+                    <li>Rice</li>
+                    <li>Parmesan Cheese</li>
+                </ul>
+                <p><strong>Instructions:</strong></p>
+                <p>Cook noodles, meat, and sauce separately, then combine.</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
