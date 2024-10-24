@@ -1,0 +1,46 @@
+<body>
+    <table>
+        <tr>
+            <td><input id="one" type="text" value="0"></td>
+            <td><input id="two" type="text" value="0"></td>
+            <td><input id="three" type="text" value="0"></td>
+        </tr>
+        <tr>
+            <td><input id="four" type="text" value="0"></td>
+            <td><input id="five" type="text" value="0"></td>
+            <td><input id="six" type="text" value="0"></td>
+        </tr>
+    </table>
+
+    <input id="sum" type="text" readonly placeholder="The sum will be here."
+    style="width: 200px; padding: 10px; font-size: 16px; border: 2px solid #007BFF; border-radius: 5px; background-color: #F0F8FF; color: #333; text-align: center; cursor: not-allowed;"></input>
+
+
+    <script>
+        function changeText() {
+            let array = [
+                parseInt(document.getElementById("one").value) || 0, 
+                parseInt(document.getElementById("two").value) || 0, 
+                parseInt(document.getElementById("three").value) || 0,
+                parseInt(document.getElementById("four").value) || 0,
+                parseInt(document.getElementById("five").value) || 0,
+                parseInt(document.getElementById("six").value) || 0
+            ];
+
+            let sum = 0;
+
+            for (let i = 0; i < array.length; i++) {
+                sum += array[i];
+            }
+
+            document.getElementById("sum").value = sum;
+        }
+
+        document.getElementById("one").addEventListener("input", changeText);
+        document.getElementById("two").addEventListener("input", changeText);
+        document.getElementById("three").addEventListener("input", changeText);
+        document.getElementById("four").addEventListener("input", changeText);
+        document.getElementById("five").addEventListener("input", changeText);
+        document.getElementById("six").addEventListener("input", changeText);
+    </script>
+</body>

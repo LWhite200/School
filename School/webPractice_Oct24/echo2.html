@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <p id="swooza" style="color: red; font-size: 50px;">Initial Text</p>
+    <input id="boobas" type="text" value="" placeholder="Enter new text here">
+
+    <script>
+        function changeText() {
+            let inputText = document.getElementById("boobas").value;
+            let transformedText = '';
+
+            for (let char of inputText) {
+                if (char >= 'a' && char <= 'z') {
+                    transformedText += String.fromCharCode(219 - char.charCodeAt(0));
+                } else if (char >= 'A' && char <= 'Z') {
+                    transformedText += String.fromCharCode(155 - char.charCodeAt(0));
+                } else {
+                    transformedText += char;
+                }
+            }
+
+            document.getElementById("swooza").textContent = transformedText;
+        }
+
+        document.getElementById("boobas").addEventListener("input", changeText);
+    </script>
+</body>
+</html>

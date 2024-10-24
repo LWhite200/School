@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <p id="swooza" style="color : red; font-size : 50px;">Initial Text</p>
+    <input id="boobas" type="text" value="" placeholder="Enter new text here">
+    <button id="Sarsaparilla" onclick="changeText()">Change Text</button>
+
+    <script>
+        function changeText() {
+            let inputText = document.getElementById("boobas").value;
+            let transformedText = '';
+
+            for (let char of inputText) {
+                if (char >= 'a' && char <= 'z') {
+                    // Get the opposite letter for lowercase
+                    transformedText += String.fromCharCode(219 - char.charCodeAt(0));
+                } else if (char >= 'A' && char <= 'Z') {
+                    // Get the opposite letter for uppercase
+                    transformedText += String.fromCharCode(155 - char.charCodeAt(0));
+                } else {
+                    // If it's not a letter, keep it as is
+                    transformedText += char;
+                }
+            }
+
+            document.getElementById("swooza").textContent = transformedText;
+            document.getElementById("boobas").value = "";
+        }
+    </script>
+</body>
+</html>
