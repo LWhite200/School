@@ -1,4 +1,6 @@
-package hw3;
+// Homework 3:   CIS 316   October 26, 2024
+// Name: Lukas A. White
+// Dijkstra's algorithm on a graph from a text file
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,10 +13,10 @@ public class Dijkstra {
 	
 	static int rows = 0; // Initialize rows and cols
 	static int cols = 0;
-	static String fileName = "g2.txt";
+	static String graphName = "graph2.txt";
 
 	public static void main(String[] args) {
-		int[][] graph = makeGraph();
+		int[][] graph = makeGraph(graphName);
 		DijkstraAlgo(graph, 0);
 	}
 	
@@ -100,7 +102,7 @@ public class Dijkstra {
 	
 	// Makes the graph and fills it with the file values as integers 
 	// Must get the rows/cols first so we can make the correct graph size. Both will always be the same.
-	public static int[][] makeGraph() {
+	public static int[][] makeGraph(String fileName) {
 	    try (Scanner scanner = new Scanner(new File(fileName))) {
 	        // Initialize line outside the loop
 	        String line = "";
