@@ -1,8 +1,11 @@
+// Homework 4: Matrix Chain - CS 316
+// Lukas A. White - Nov, 23, 2024
+
 package hw4;
 
 public class MatrixChain {
 
-    // Main function to test the program
+    //--------------------------------------------------
     public static void main(String[] args) {
         
     	// The values from the slide
@@ -10,61 +13,67 @@ public class MatrixChain {
         
         int n = p.length - 1;
         
+        // java by default fills everything in as zero
         int[][] m = new int[n][n];
         int[][] s = new int[n][n];
         
-        // Chain length
+        
+        // Basically the exact same code from the slide but in java, len is the chain length
         for (int len = 2; len <= n; len++) {
             for (int i = 0; i < n - len + 1; i++) {
+            	
                 int j = i + len - 1;
                 m[i][j] = Integer.MAX_VALUE;
+                
                 for (int k = i; k < j; k++) {
                 	
-                    // Calculate the cost of the current split (the formula)
-                    int q = m[i][k] + m[k + 1][j] + p[i] * p[k + 1] * p[j + 1];
+                    // Similar to the slide, but the    part below had some adjustments
+                    int q = m[i][k] +    m[k + 1][j]    + p[i] * p[k + 1] * p[j + 1];
+                    
                     if (q < m[i][j]) {
                         m[i][j] = q;
                         s[i][j] = k;
                     }
+                    
                 }
             }
         }
         
-        System.out.println("m table (minimum number of multiplications):");
-        printFormattedMatrix(m, n, 6);
+        // size is for the table format, spacing
+        System.out.println("m table:");
+        printMat(m, n, 6);
 
-        System.out.println("\ns table (optimal split points):");
-        printFormattedMatrix(s, n, 6); 
+        System.out.println("\ns table:");
+        printMat(s, n, 6); 
 
-        // This calls for the parenthesis output.
-        System.out.println("\nOptimal Matrix Chain Multiplication Order:");
-        printOptimalParenthesization(s, 0, n - 1);
+        System.out.println("\nMatrix Parentheses Order:");
+        parenthesis(s, 0, n - 1);
         System.out.println();
     }
     
-    // Prints the matrixes with parameters to adjust the size of the output as they're weird.
-    public static void printFormattedMatrix(int[][] matrix, int n, int columnSpacing) {
+    //-----------------------------------------
+    // Prints matrix and formats it so it does not look disgusting, readable
+    public static void printMat(int[][] matrix, int n, int rowSpace) {
     	
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                if (matrix[i][j] == Integer.MAX_VALUE) {
-                    System.out.printf("%" + columnSpacing + "s", "∞");
-                } else {
-                    System.out.printf("%" + columnSpacing + "d", matrix[i][j]);
-                }
+            	
+            	// This separates the items of a row by rowSpace, they are right aligned "d" 
+            	System.out.printf("%" + rowSpace + "d", matrix[i][j]);
             }
             System.out.println();
         }
     }
     
-    // This constructs the parenthesis.
-    public static void printOptimalParenthesization(int[][] s, int i, int j) {
+    //-----------------------------------------
+    // Parenthesis.
+    public static void parenthesis(int[][] s, int i, int j) {
         if (i == j) {
             System.out.print("A" + (i + 1));
         } else {
             System.out.print("(");
-            printOptimalParenthesization(s, i, s[i][j]);
-            printOptimalParenthesization(s, s[i][j] + 1, j);
+            parenthesis(s, i, s[i][j]);
+            parenthesis(s, s[i][j] + 1, j);
             System.out.print(")");
         }
     }

@@ -29,6 +29,7 @@ class huffman {
 		// java weird, compares the nodes based on the node.frequency
 		PriorityQueue<treeNode> pq = new PriorityQueue<>(Comparator.comparingInt(node -> node.freq));
 		
+        // Saw this online, overpowered
 		for (Map.Entry<Character, Integer> entry : freqMap.entrySet()) {
             pq.add(new treeNode(entry.getKey(), entry.getValue()));
         }
