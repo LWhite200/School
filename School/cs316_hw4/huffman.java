@@ -1,108 +1,125 @@
+//Homework 4: Lowest Common Substring - CS 316
+// Lukas A. White - Nov,22,2024
+
 package hw4;
 
 import java.util.*;
 
-class HuffmanNode {
+//-----------------------------------
+// We use a binary tree to calculate things (the character itself, frequency in string, it's children.
+class treeNode {
     char character;
-    int frequency;
-    HuffmanNode left, right;
+    int freq;
+    treeNode left, right;
 
-    // Constructor
-    public HuffmanNode(char character, int frequency) {
+    public treeNode(char character, int freq) {
         this.character = character;
-        this.frequency = frequency;
+        this.freq = freq;
         this.left = this.right = null;
     }
 }
 
 class huffman {
-
-    // Function to build the Huffman Tree
-    public static HuffmanNode buildHuffmanTree(Map<Character, Integer> frequencyMap) {
-        // Priority queue (min-heap) to store the nodes based on frequency
-        PriorityQueue<HuffmanNode> pq = new PriorityQueue<>(Comparator.comparingInt(node -> node.frequency));
-
-        // Build the initial nodes and add them to the priority queue
-        for (Map.Entry<Character, Integer> entry : frequencyMap.entrySet()) {
-            pq.add(new HuffmanNode(entry.getKey(), entry.getValue()));
+	
+	//------------------------------
+	// Gotta build that tree
+	private static treeNode buildTree(Map<Character, Integer> freqMap) {
+		
+		// Creates the tree using a PQ so that they are in order
+		// java weird, compares the nodes based on the node.frequency
+		PriorityQueue<treeNode> pq = new PriorityQueue<>(Comparator.comparingInt(node -> node.freq));
+		
+		for (Map.Entry<Character, Integer> entry : freqMap.entrySet()) {
+            pq.add(new treeNode(entry.getKey(), entry.getValue()));
         }
-
-        // Build the Huffman Tree
+		
+		// Since all chars are in the tree, we must make those chars the leaves of their combined values
+		// We do this by taking the 2 lowest frequency nodes and then making them child of their combined
         while (pq.size() > 1) {
-            // Remove two nodes with the lowest frequency
-            HuffmanNode left = pq.poll();
-            HuffmanNode right = pq.poll();
+        	
+        	// poll means Pull from the top of queue. IDK why not pull.
+            treeNode left = pq.poll();
+            treeNode right = pq.poll();
 
-            // Create a new node with the combined frequency and add it back to the priority queue
-            HuffmanNode merged = new HuffmanNode('\0', left.frequency + right.frequency);
-            merged.left = left;
-            merged.right = right;
-            pq.add(merged);
+            // Creates new node by combining them. \0 means null or 0
+            treeNode combined = new treeNode('\0', left.freq + right.freq);
+            combined.left = left;
+            combined.right = right;
+            pq.add(combined);
         }
 
-        // The remaining node is the root of the Huffman Tree
+        // return the top of the PQ which points to the entire PQ somehow, this is confusing.
+        // Since there is one node in the PQ, that node consists of an entire huffman tree.
         return pq.poll();
-    }
-
-    // Function to generate the Huffman codes
-    public static void generateHuffmanCodes(HuffmanNode root, String code, Map<Character, String> huffmanCodes) {
+		
+	}
+	
+	//-----------------------------------------------------
+	// Traverse the tree with dfs to generate what the values of each char are in the new binary
+	public static void generateBinary(treeNode root, String binary, Map<Character, String> binaryMap) {
         if (root == null) return;
 
-        // If this is a leaf node, it contains a character
+        // If leaf node, add to the map
         if (root.left == null && root.right == null) {
-            huffmanCodes.put(root.character, code);
+            binaryMap.put(root.character, binary);
             return;
         }
 
-        // Traverse left and right subtrees
-        generateHuffmanCodes(root.left, code + "0", huffmanCodes);
-        generateHuffmanCodes(root.right, code + "1", huffmanCodes);
+        generateBinary(root.left, binary + "0", binaryMap);
+        generateBinary(root.right, binary + "1", binaryMap);
     }
+	
+	//------------------------------------------------------
+	// compression ratio
+    public static double calcCompression(Map<Character, Integer> freqMap, Map<Character, String> binaryMap, int original) {
+        int compSize = 0; // total of the compressed 
 
-    // Function to calculate the compression ratio
-    public static double calculateCompressionRatio(Map<Character, Integer> frequencyMap, Map<Character, String> huffmanCodes, int originalSize) {
-        int compressedSize = 0;
-
-        // Calculate the total compressed size based on the Huffman codes
-        for (Map.Entry<Character, Integer> entry : frequencyMap.entrySet()) {
-            char character = entry.getKey();
-            int frequency = entry.getValue();
-            String huffmanCode = huffmanCodes.get(character);
-            compressedSize += frequency * huffmanCode.length();
+        for (Map.Entry<Character, Integer> letter : freqMap.entrySet()) {
+        	
+        	// must get key and value separate in Java apparently
+            char character = letter.getKey();            
+            int frequency = letter.getValue();
+            
+            String letBinary = binaryMap.get(character);
+            
+            compSize += frequency * letBinary.length();
         }
-
-        // Compression ratio = new file size / old file size
-        return (double) compressedSize / (originalSize * 8); // Convert original size to bits
+        
+        original *= 8;
+        return (double) compSize / original; 
     }
 
+	//----------------------------------------------------
+	//Main function
     public static void main(String[] args) {
-        // Step 1: Read the input string
+    	
+        // Get User Input
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter a string: ");
-        String input = scanner.nextLine().toLowerCase();  // Convert to lowercase for simplicity
+        String input = scanner.nextLine().toLowerCase();
 
-        // Step 2: Calculate frequency of each character
-        Map<Character, Integer> frequencyMap = new HashMap<>();
+        // Finds the frequencies of each letter
+        Map<Character, Integer> freqMap = new HashMap<>();
         for (char c : input.toCharArray()) {
-            frequencyMap.put(c, frequencyMap.getOrDefault(c, 0) + 1);
+            freqMap.put(c, freqMap.getOrDefault(c, 0) + 1);
         }
 
-        // Step 3: Build Huffman Tree
-        HuffmanNode root = buildHuffmanTree(frequencyMap);
+        // Builds the tree
+        treeNode root = buildTree(freqMap);
 
-        // Step 4: Generate Huffman Codes
+        // This generate the binary representation of each letter
         Map<Character, String> huffmanCodes = new HashMap<>();
-        generateHuffmanCodes(root, "", huffmanCodes);
+        generateBinary(root, "", huffmanCodes);
 
-        // Step 5: Display Huffman Codes
+        // Display
         System.out.println("Huffman Code Table:");
         for (Map.Entry<Character, String> entry : huffmanCodes.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
-        // Step 6: Calculate and display Compression Ratio
+        // Compression
         int originalSize = input.length();  // Size in characters (each character is 1 byte = 8 bits)
-        double compressionRatio = calculateCompressionRatio(frequencyMap, huffmanCodes, originalSize);
+        double compressionRatio = calcCompression(freqMap, huffmanCodes, originalSize);
         System.out.printf("Compression ratio = %.4f\n", compressionRatio);
     }
 }

@@ -1,3 +1,6 @@
+//Homework 4: Lowest Common Substring - CS 316
+// Lukas A. White - Nov,19,2024
+
 package hw4;
 
 import java.util.Scanner;
@@ -50,16 +53,16 @@ public class LCS {
         String lcs = "";        
         int x = m, y = n;
         
-        // Must traverse in reverse as the arrows at the end point to the best path
+        // Must traverse in reverse. This follows where the "arrows" point
         while (x > 0 && y > 0) {
             if (dir[x][y].equals("ul")) {
                 lcs += one.charAt(x - 1);
-                x--; 
-                y--;
+                x -= 1; 
+                y -= 1;
             } else if (dir[x][y].equals("u")) {
-                x--;  
+                x -= 1;  
             } else {
-                y--;
+                y -= 1;
             }
         }
         
