@@ -46,7 +46,7 @@ public class client {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 while (true) {
                     out.println("heartbeat");  // Send heartbeat
-                    System.out.println("Heartbeat sent to server.");
+                    // System.out.println("Heartbeat sent to server.");
                     Thread.sleep(2000);  // Wait for 2 seconds
                 }
             } catch (InterruptedException | IOException e) {
