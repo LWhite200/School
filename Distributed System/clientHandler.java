@@ -32,6 +32,16 @@ public class clientHandler implements Runnable {
                     clientNode.lastBeat = (int) (System.currentTimeMillis() / 1000);  // Update with current time in seconds
                     System.out.println("Heartbeat received from Node: " + clientNode);
                     
+                } else if ("getList".equals(message)) {
+                	
+                	// Send the entire list of nodes
+                	String nodeList = "";
+                	for (NodeObj node : server.nodeObj) {
+                	    nodeList += node.toString() + "#";  // Each node is separated by a newline
+                	}
+                	out.println(nodeList.toString());  // Send the list to the client
+
+                    
                 } else {
                     out.println("Unknown message: " + message);
                 }

@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
+import pgrm3.server.NodeObj;
+
 // Holds list of node objects [IP, Port, unique ID, lastBeat]
 
 public class server {
@@ -20,11 +22,11 @@ public class server {
 	    String thisIP = InetAddress.getLocalHost().getHostAddress();
 	    NodeObj serverNode = new NodeObj(thisIP, 8000, 1, System.currentTimeMillis() / 1000, 0);
 	    nodeObj.add(serverNode);
-	    notifyAllNodes(); // debug
 	    
 	    System.out.println("Waiting on connections...");
 	    
 	    // Start heartbeat monitor thread
+	    new Thread(new serverHeartBeat()).start();
 	    new Thread(new HeartbeatMonitor()).start();
 
 	    while (true) {
@@ -34,29 +36,51 @@ public class server {
 	    }
 	}
 
-	
-	
 	//-----------------------------------------------------
 	// When a new node joins.
 	public static void newNodeJoin(NodeObj NNO) {
 		
 		nodeObj.add(NNO);
 		
+		System.out.println("New Active Node: " + NNO);
+		
         for (NodeObj node : nodeObj) {
-            System.out.println("Active Node: " + node);
+            
         }
+    }
+	
+	//-----------------------------------------------------
+	// This will return the updated list to clients
+	public static ArrayList<NodeObj> getList() {
+        return nodeObj;
     }
 	
 	
 	
 	
 	//-----------------------------------------------------
-	// This will notify all the nodes that someone joined or left.
-	public static void notifyAllNodes() {
-        for (NodeObj node : nodeObj) {
-            System.out.println("Active Node: " + node);
-        }
-    }
+	// Server's heart beat
+    public static class serverHeartBeat implements Runnable {
+	    private static final int TIMEOUT = 10;  // Timeout in seconds (adjust as needed)
+	    
+	    @Override
+	    public void run() {
+	        while (true) {
+	            long currentTime = System.currentTimeMillis() / 1000;  // Get current time in seconds
+	            
+	            NodeObj serNode = nodeObj.get(0);
+	            serNode.lastBeat = (int) (System.currentTimeMillis() / 1000);  // Update with current time in seconds
+	            System.out.println("Heartbeat received from Node: " + serNode);
+
+	            try {
+	                Thread.sleep(2000);  // Check every 5 seconds (adjust as needed)
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	}
+	
 	
 	
 	//-----------------------------------------------------
@@ -100,9 +124,9 @@ public class server {
 	//-----------------------------------------------------
 	// This will hold obj that has all the info of each node.
 	public static class NodeObj {
-	    String IP;
+		int ID;
 	    int Port;
-	    int ID;
+	    String IP;
 	    long startTime;
 	    int lastBeat;
 	    boolean isActive;  // Add a status to track if the node is active or not
@@ -118,7 +142,7 @@ public class server {
 
 	    @Override 
 	    public String toString() {
-	        return "Node{ID=" + ID + ", IP=" + IP + ", Port=" + Port + ", LastBeat=" + lastBeat + ", Active=" + isActive + "}";
+	        return ID + "," + Port + "," + IP + "," + startTime + "," + lastBeat + "," + isActive;
 	    }
 	}
 
