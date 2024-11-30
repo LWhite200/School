@@ -7,6 +7,7 @@ import pgrm3.server.NodeObj;
 public class clientHandler implements Runnable {
     private Socket socket;
     private NodeObj clientNode;
+    public boolean changeList = false;
 
     public clientHandler(Socket socket) {
         this.socket = socket;
@@ -27,7 +28,9 @@ public class clientHandler implements Runnable {
             
             while ((message = in.readLine()) != null) {
             	
-                if ("heartbeat".equals(message)) {
+            	
+            	
+            	if ("heartbeat".equals(message)) {
                 	
                     clientNode.lastBeat = (int) (System.currentTimeMillis() / 1000);  // Update with current time in seconds
                     System.out.println("Heartbeat received from Node: " + clientNode);
@@ -45,6 +48,20 @@ public class clientHandler implements Runnable {
                 } else {
                     out.println("Unknown message: " + message);
                 }
+            	
+            	
+            	if (changeList) {
+            		changeList = false;
+            		
+            		// Send the entire list of nodes
+                	String nodeList = "";
+                	for (NodeObj node : server.nodeObj) {
+                	    nodeList += node.toString() + "#";  // Each node is separated by a newline
+                	}
+                	out.println(nodeList.toString());  // Send the list to the client
+                	System.out.println("message sent");
+            		
+            	}
                 
             }
         } catch (IOException e) {
@@ -57,5 +74,12 @@ public class clientHandler implements Runnable {
             }
         }
     }
+    
+    public void sendNewNode() {
+    	
+    	changeList = true;
+
+    }
+    
 }
 

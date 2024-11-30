@@ -11,6 +11,7 @@ import pgrm3.server.NodeObj;
 public class server {
 	
 	public static ArrayList<NodeObj> nodeObj = new ArrayList<>();
+	public static ArrayList<clientHandler> clients = new ArrayList<>(); 
 	
 	
 	//------------------------------------------------------
@@ -32,6 +33,7 @@ public class server {
 	    while (true) {
 	        Socket socket = s.accept();
 	        clientHandler c = new clientHandler(socket);  // Creates a new client handler for the accepted socket
+	        clients.add(c);
 	        new Thread(c).start();
 	    }
 	}
@@ -44,9 +46,9 @@ public class server {
 		
 		System.out.println("New Active Node: " + NNO);
 		
-        for (NodeObj node : nodeObj) {
-            
-        }
+		for(int i = 0; i < clients.size() - 1; i++) {
+			clients.get(i).sendNewNode();
+		}
     }
 	
 	//-----------------------------------------------------
