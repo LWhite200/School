@@ -10,6 +10,7 @@ public class client {
 
     public static void main(String[] args) throws Exception {
         Scanner input = new Scanner(System.in);
+
         System.out.println("Trying to connect to server");
 
         Socket socket = new Socket("localhost", 8000);
@@ -20,7 +21,8 @@ public class client {
 
         // Start heartbeat sender
         Heartbeat hb = new Heartbeat(socket);
-        new Thread(hb).start();
+        Thread heartbeatThread = new Thread(hb);
+        heartbeatThread.start();
 
         // Get initial list of nodes
         out.println("getList");
@@ -29,20 +31,77 @@ public class client {
 
         // Start listening for updates
         Listener lis = new Listener(socket);
-        new Thread(lis).start();
+        Thread listenerThread = new Thread(lis);
+        listenerThread.start();
         
-        lis.stopListening();
-        hb.stopHeartbeat();  // Stop the heartbeat thread
-        out.println("leave");  // Send leave message to the server
-        socket.close();  // Close the socket
-        System.out.println("Client is leaving the system.");
+        
+        
+        
+        //--------------------------
+        // Handle commands for testing
+        
+        boolean isBeating = true;
+        
+        while(true) {
+        	System.out.println("Press [sh] to stop heart : [st] to start, [leave] to leave:");
+            String command = input.nextLine();  // Waiting for "Enter" to leave
+            
+            
+            if (command.equals("sh")) {
+            	if (isBeating) {
+            		isBeating = false;
+            		hb.changeHeartbeat();
+            		System.out.println("Heart Beat Stopped");
+            	}
+            	else {
+            		System.out.println("heart already stopped");
+            	}
+            }
+            else if (command.equals("st")) {
+            	if (!isBeating) {
+            		isBeating = true;
+                    // Stop the current heartbeat thread before starting a new one
+                    hb.changeHeartbeat();  // Stops the current heartbeat thread
+                    hb = new Heartbeat(socket);  // Create a new heartbeat
+                    heartbeatThread = new Thread(hb);  // Start a new heartbeat thread
+                    heartbeatThread.start();  // Start the new heartbeat thread
+                    System.out.println("Heart Beat Reactivated");
+            	}
+            	else {
+            		System.out.println("heart already active");
+            	}
+            }
+            else if (command.equals("leave")) {
+            	
+            	out.println("leave");
+
+                lis.stopListening();
+                if(isBeating) {
+                	hb.changeHeartbeat();
+                }
+                
+                socket.close();
+
+                listenerThread.join();
+                heartbeatThread.join();
+
+                System.out.println("Client is leaving the system.");
+                break;
+            	
+            }
+            else {
+            	System.out.println("Invalid Command : [sh], [st], [leave]");
+            }
+            
+        }
+
+        
     }
-    
 
     // Listens for updates from the server
     public static class Listener implements Runnable {
         private Socket socket;
-        boolean listening = true;
+        private boolean listening = true;
 
         public Listener(Socket socket) {
             this.socket = socket;
@@ -50,23 +109,35 @@ public class client {
 
         @Override
         public void run() {
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-                while(listening) {
-                	
-                	if(listening) {
-                		String newList;
-                		if(listening) {
-                			if ((newList = in.readLine()) != null) {
-                                string2List(newList);  // Update the node list with the new data
-                            }
-                		}
-                	}                	
+            BufferedReader in = null;
+            try {
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                while (listening && !socket.isClosed()) {
+                    String newList;
+                    if ((newList = in.readLine()) != null) {
+                        string2List(newList);  // Update the node list with the new data
+                    }
+                }
+            } catch (SocketException e) {
+                // Handle socket closure or any other socket-related exception
+                if (socket.isClosed()) {
+                    System.out.println("Socket closed, stopping listener.");
+                } else {
+                    e.printStackTrace();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    if (in != null) {
+                        in.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        
+
         public void stopListening() {
             listening = false;
         }
@@ -105,7 +176,10 @@ public class client {
             System.out.println(node);
         }
     }
-
+    
+    
+    //------------------------------------------------------
+  	// Controls the heart beating
     public static class Heartbeat implements Runnable {
         private Socket socket;
         private boolean running = true;
@@ -127,10 +201,12 @@ public class client {
             }
         }
 
-        public void stopHeartbeat() {
-            running = false;
+        public void changeHeartbeat() {
+            running = !running;
         }
     }
+    
+    
 
     public static class NodeObj {
         String IP;
