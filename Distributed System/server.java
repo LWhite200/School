@@ -51,6 +51,19 @@ public class server {
 		}
     }
 	
+	
+	//-----------------------------------------------------
+	// When a node leaves.
+	public static void nodeLeave(NodeObj NNO) {
+	    nodeObj.remove(NNO);  // Make sure to remove the node from the list
+	    System.out.println("Node left: " + NNO);
+		    
+	    // Send updated node list to all remaining clients
+	    for (clientHandler c : clients) {
+	        c.sendNewNode();
+	    }
+	}
+	
 	//-----------------------------------------------------
 	// This will return the updated list to clients
 	public static ArrayList<NodeObj> getList() {

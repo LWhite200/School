@@ -30,11 +30,19 @@ public class client {
         // Start listening for updates
         Listener lis = new Listener(socket);
         new Thread(lis).start();
+        
+        lis.stopListening();
+        hb.stopHeartbeat();  // Stop the heartbeat thread
+        out.println("leave");  // Send leave message to the server
+        socket.close();  // Close the socket
+        System.out.println("Client is leaving the system.");
     }
+    
 
     // Listens for updates from the server
     public static class Listener implements Runnable {
         private Socket socket;
+        boolean listening = true;
 
         public Listener(Socket socket) {
             this.socket = socket;
@@ -43,13 +51,24 @@ public class client {
         @Override
         public void run() {
             try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-                String newList;
-                while ((newList = in.readLine()) != null) {
-                    string2List(newList);  // Update the node list with the new data
+                while(listening) {
+                	
+                	if(listening) {
+                		String newList;
+                		if(listening) {
+                			if ((newList = in.readLine()) != null) {
+                                string2List(newList);  // Update the node list with the new data
+                            }
+                		}
+                	}                	
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        
+        public void stopListening() {
+            listening = false;
         }
     }
 
@@ -89,6 +108,7 @@ public class client {
 
     public static class Heartbeat implements Runnable {
         private Socket socket;
+        private boolean running = true;
 
         public Heartbeat(Socket socket) {
             this.socket = socket;
@@ -98,13 +118,17 @@ public class client {
         public void run() {
             try {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                while (true) {
+                while (running) {
                     out.println("heartbeat");  // Send heartbeat
                     Thread.sleep(2000);  // Wait for 2 seconds
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        public void stopHeartbeat() {
+            running = false;
         }
     }
 

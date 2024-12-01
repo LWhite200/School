@@ -27,30 +27,27 @@ public class clientHandler implements Runnable {
             String message;
             
             while ((message = in.readLine()) != null) {
-            	
-            	
-            	
-            	if ("heartbeat".equals(message)) {
-                	
-                    clientNode.lastBeat = (int) (System.currentTimeMillis() / 1000);  // Update with current time in seconds
+                // Handle incoming messages
+                if ("heartbeat".equals(message)) {
+                    clientNode.lastBeat = (int) (System.currentTimeMillis() / 1000);
                     System.out.println("Heartbeat received from Node: " + clientNode);
-                    
                 } else if ("getList".equals(message)) {
-                	
-                	// Send the entire list of nodes
-                	String nodeList = "";
-                	for (NodeObj node : server.nodeObj) {
-                	    nodeList += node.toString() + "#";  // Each node is separated by a newline
-                	}
-                	out.println(nodeList.toString());  // Send the list to the client
-
-                    
+                    // Send node list to client
+                    String nodeList = "";
+                    for (NodeObj node : server.nodeObj) {
+                        nodeList += node.toString() + "#";
+                    }
+                    out.println(nodeList);  // Send the list to the client
+                } else if ("leave".equals(message)) {
+                    // Client wants to leave
+                    server.nodeLeave(clientNode);  // Server updates its node list
+                    break;  // Break out of the loop and allow socket to be closed
                 } else {
                     out.println("Unknown message: " + message);
                 }
-            	
-            	
-            	if (changeList) {
+                
+                
+                if (changeList) {
             		changeList = false;
             		
             		// Send the entire list of nodes
@@ -62,11 +59,11 @@ public class clientHandler implements Runnable {
                 	System.out.println("message sent");
             		
             	}
-                
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Connection error with client: " + e.getMessage());
         } finally {
+            // Ensure socket is always closed in case of any unexpected error
             try {
                 socket.close();
             } catch (IOException e) {
@@ -74,6 +71,7 @@ public class clientHandler implements Runnable {
             }
         }
     }
+
     
     public void sendNewNode() {
     	
