@@ -18,44 +18,43 @@ try {
     $countriesResult = $pdo->query($countriesQuery);
     $countries = $countriesResult->fetchAll(PDO::FETCH_ASSOC);
 
-    // Base query to fetch images
+    // Base query to fetch images with an additional JOIN for continents to get continent codes
     $sql = "SELECT imagedetails.ImageID, imagedetails.path, imagedetails.Title, imagedetails.Description, 
-                   imagedetails.Exif, imagedetails.Colors, 
-                   countries.CountryName, cities.AsciiName AS CityName
-            FROM imagedetails
-            JOIN countries ON imagedetails.CountryCodeISO = countries.ISO
-            JOIN cities ON imagedetails.CityCode = cities.CityCode";
+               imagedetails.Exif, imagedetails.Colors, 
+               countries.CountryName, cities.AsciiName AS CityName
+        FROM imagedetails
+        JOIN countries ON imagedetails.CountryCodeISO = countries.ISO
+        JOIN cities ON imagedetails.CityCode = cities.CityCode
+        JOIN continents ON countries.Continent = continents.ContinentCode";  // Added JOIN with continents table
 
-    // Apply filters if they are set
-    // 
-    $filters = []; # This where the filter
+// Apply filters if they are set
+$filters = []; 
 
+// Check if the 'continent' filter is set and not equal to '0' (default value)
+if (isset($_GET['continent']) && $_GET['continent'] != '0') {
+    // Add a filter condition for the continent
+    $filters[] = "continents.ContinentCode = :continent";  // Updated to use the continents.ContinentCode
+}
 
-    // Check if the 'continent' filter is set and not equal to '0' (default value)
-    if (isset($_GET['continent']) && $_GET['continent'] != '0') {
-        // Add a filter condition for the continent
-        $filters[] = "countries.ContinentCode = :continent";
-    }
-    if (isset($_GET['countries']) && $_GET['countries'] != '0') {
-        $filters[] = "imagedetails.CountryCodeISO = :country";
-    }
-    if (isset($_GET['title']) && !empty($_GET['title'])) {
-        $filters[] = "imagedetails.Title LIKE :title";
-    }
+if (isset($_GET['countries']) && $_GET['countries'] != '0') {
+    $filters[] = "imagedetails.CountryCodeISO = :country";
+}
 
-    // If there are any filters applied, add them to the SQL query
-    if (!empty($filters)) {
-        // Append the WHERE clause to the SQL query
-        // implode(" AND ", $filters) joins the filter conditions with " AND "
-        $sql .= " WHERE " . implode(" AND ", $filters);
-    }
+if (isset($_GET['title']) && !empty($_GET['title'])) {
+    $filters[] = "imagedetails.Title LIKE :title";
+}
+
+// If there are any filters applied, add them to the SQL query
+if (!empty($filters)) {
+    $sql .= " WHERE " . implode(" AND ", $filters);
+}
+
 
     // Prepare the SQL query for execution
     $stmt = $pdo->prepare($sql);
 
     // Bind the filter values to the placeholders in the SQL query
     if (isset($_GET['continent']) && $_GET['continent'] != '0') {
-        // Bind the selected continent value to the :continent placeholder
         $stmt->bindValue(':continent', $_GET['continent']);
     }
     if (isset($_GET['countries']) && $_GET['countries'] != '0') {
@@ -68,20 +67,17 @@ try {
     $stmt->execute();
     $images = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all the filtered images as an associative array
 
-
-
-
     // Decode JSON data in Exif and Colors fields
     foreach ($images as &$image) {
         $image['Exif'] = json_decode($image['Exif'], true);
         $image['Colors'] = json_decode($image['Colors'], true);
     }
 
-
 } catch (PDOException $e) {
     die("DataBase Connection Error. make sure running and named 'travel': " . $e->getMessage());
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -133,7 +129,10 @@ try {
             foreach ($images as $image) {
                 echo '<li>';
                 echo '<a href="detail.php?ImageID=' . $image['ImageID'] . '">'; 
-                echo '<img src="' . $image['path'] . '" alt="Travel Image" style="width: 300px; height: auto;">';
+
+                # <!-- Have to show the link or image, not random nonsense text -->
+                echo '<img src="' . $image['path'] . '" alt="' . (file_exists($image['path']) ? 'Travel Image' : $image['path']) . '" style="width: 300px; height: auto;">';
+
                 echo '</a>';
                 echo '</li>';
             }
